@@ -23,7 +23,7 @@ class Commit
   def initialize(old_objects, new_objects, deleted_objects,  message)
     @message = message
     @date = Time.new
-    hash_string = @date.strftime("%a %b %d %H:%M:%S %Y %z") + message
+    hash_string = @date.strftime("%a %b %d %H:%M %Y %z") + message
     @hash =  Digest::SHA1.hexdigest(hash_string)
     @objects_hash = old_objects.dup
     new_objects.each { |key, value| @objects_hash[key] = value }
@@ -178,15 +178,20 @@ class ObjectStore
     BranchManager.new self
   end
 
+  def format_commit_log(commit)
+    format = -> (commit) do
+      time = commit.date_formated
+      "Commit #{commit.hash}\nDate: #{time}\n\n\t#{commit.message}"
+    end
+  end
+
+
   def log
     commits, name = branches[@head_branch].commits, @head_branch
     if commits.size == 0
       return RepoResult.new("Branch #{name} does not have any commits yet.")
     end
-    format = -> (commit) do
-      time = commit.date_formated
-      "Commit #{commit.hash}\nDate: #{time}\n\n\t#{commit.message}"
-    end
+    format =  format_commit_log(commits)
     message = commits.reverse.map { |commit| format.call commit }.join("\n\n")
     RepoResult.new(message, true)
   end
@@ -194,7 +199,7 @@ class ObjectStore
   def head
     commits, name = branches[@head_branch].commits, @head_branch
     if commits.size == 0
-      return RepoResult.new("Branch #{@name} does not have any commits yet.")
+      return RepoResult.new("Branch #{name} does not have any commits yet.")
     end
     last_commit = commits[-1]
     RepoResult.new(last_commit.message, true, last_commit)
