@@ -3,11 +3,8 @@ module TurtleGraphics
     attr_accessor :width, :height, :table, :position
 
     def initialize(height, width)
-      @width = width
-      @height = height
-      @table = []
-      @position = [0, 0]
-      @direction = 0
+      @width, @height = width, height
+      @table, @position, @direction = [], [0, 0], 0
       @moves = [[0, 1], [1, 0], [0, -1], [-1, 0]]
       row = []
       (1..width).each { row << 0 }
@@ -49,16 +46,8 @@ module TurtleGraphics
     end
 
     def look(orientation)
-      @direction = case orientation
-                     when :left
-                       2
-                     when :up
-                       3
-                     when :right
-                       0
-                     when :down
-                       1
-                   end
+      orientation_map = { left: 2, up: 3, right: 0, down: 1 }
+      @direction = orientation_map[orientation]
     end
 
 
